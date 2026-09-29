@@ -1,0 +1,24 @@
+// import { Router } from 'express';
+// import { userController } from '../controllers/user.controller.ts';
+// import { authorize, protectedAction } from '../middlewares/protected.middleware.ts';
+
+
+// const router = Router();
+
+// router.post('/signup', userController.createUser);
+
+// router.post('/login', userController.login);
+
+// router.post('/refresh-token', userController.refreshToken);
+
+// router.get('/', userController.getAllUsers);
+
+// router.get('/:id', protectedAction, userController.getUserById);
+
+// router.patch('/:id', protectedAction, userController.updateUser);
+
+// router.delete('/:id',protectedAction, authorize('ADMIN'),  userController.deleteUser);
+
+// const UserRoute = router;
+
+// export default UserRoute;

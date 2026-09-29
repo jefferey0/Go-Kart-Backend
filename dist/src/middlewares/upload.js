@@ -1,0 +1,20 @@
+// middleware/upload.js
+import multer from 'multer';
+// Change from diskStorage to memoryStorage
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage, limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB limit
+        files: 6,
+    },
+    fileFilter: (req, file, cb) => {
+        // Accept images only
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        }
+        else {
+            cb(new Error('Only image files are allowed!'));
+        }
+    }
+});
+export default upload;
+//# sourceMappingURL=upload.js.map

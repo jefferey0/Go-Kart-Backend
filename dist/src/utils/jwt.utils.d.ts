@@ -1,0 +1,12 @@
+import type { UserRole } from "../../generated/prisma/client";
+export interface JwtPayload {
+    userId: string;
+    email: string;
+    role: UserRole;
+    jti?: string;
+}
+export declare const generateAccessToken: (payload: JwtPayload) => string;
+export declare const generateRefreshToken: (payload: JwtPayload) => string;
+export declare const verifyAccessToken: (token: string) => JwtPayload;
+export declare const verifyRefreshToken: (token: string) => JwtPayload;
+//# sourceMappingURL=jwt.utils.d.ts.map

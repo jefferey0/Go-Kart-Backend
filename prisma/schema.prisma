@@ -1,0 +1,392 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ENUMS
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum GiveawayStatus {
+  DRAFT
+  PUBLISHED
+  ACTIVE
+  CLOSED
+  DRAWING
+  WINNER_SELECTED
+  PRIZE_FULFILMENT
+  COMPLETED
+  CANCELLED
+  SUSPENDED
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+  REFUNDED
+  CANCELED
+}
+
+enum PaymentMethodType {
+  CRYPTO
+  PAYMENT_APP
+}
+
+enum PaymentMethodProvider {
+  BITCOIN
+  ETHEREUM
+  PAYPAL
+  CASH_APP
+  VENMO
+  ZELLE
+  OTHER
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum TicketStatus {
+  ACTIVE
+  WINNER
+  INVALIDATED
+}
+
+enum WinnerStatus {
+  SELECTED
+  CLAIMED
+  FULFILMENT
+  COMPLETED
+  DISPUTED
+}
+
+enum DrawStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum PrizeClaimStatus {
+  PENDING
+  CLAIMED
+  CONTACTED
+  SHIPPING
+  DELIVERED
+  CONFIRMED
+  DISPUTED
+}
+
+enum NotificationType {
+  PURCHASE_CONFIRMED
+  GIVEAWAY_ENDING
+  WINNER_SELECTED
+  PRIZE_CLAIM
+  PRIZE_DELIVERY
+  SYSTEM
+}
+
+enum AuditAction {
+  GIVEAWAY_CREATED
+  GIVEAWAY_UPDATED
+  GIVEAWAY_PUBLISHED
+  GIVEAWAY_PAUSED
+  GIVEAWAY_CLOSED
+  DRAW_STARTED
+  WINNER_SELECTED
+  USER_SUSPENDED
+  PAYMENT_CONFIRMED
+  REFUND_CREATED
+  PRIZE_CLAIMED
+}
+
+model User {
+  id              String         @id @default(uuid())
+  firstName       String
+  lastName        String
+  email           String         @unique
+  phone           String?
+  passwordHash    String
+  role            UserRole       @default(USER)
+  isEmailVerified Boolean        @default(false)
+  isActive        Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  refreshTokens   RefreshToken[]
+  orders          Order[]
+  tickets         Ticket[]
+  winners         Winner[]
+  notifications   Notification[]
+  auditLogs       AuditLog[]
+  giveaways       Giveaway[]
+  platformSettingsUpdates PlatformSettings[] @relation("PlatformSettingsUpdatedBy")
+
+  @@index([role])
+  @@index([isActive])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Category {
+  id        String     @id @default(uuid())
+  name      String     @unique
+  slug      String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  giveaways Giveaway[]
+}
+
+model Giveaway {
+  id                        String          @id @default(uuid())
+  title                     String
+  slug                      String          @unique
+  shortDescription          String
+  description               String
+  status                    GiveawayStatus  @default(DRAFT)
+  entryPrice                Decimal         @db.Decimal(12, 2)
+  currency                  String          @default("GBP")
+  maximumEntries            Int
+  entriesSold               Int             @default(0)
+  maximumEntriesPerUser     Int
+  minimumEntriesPerPurchase Int             @default(1)
+  startDate                 DateTime
+  endDate                   DateTime
+  featured                  Boolean         @default(false)
+  categoryId                String?
+  createdBy                 String
+  createdAt                 DateTime        @default(now())
+  updatedAt                 DateTime        @updatedAt
+  category                  Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  creator                   User            @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+  prize                     Prize?
+  orders                    Order[]
+  tickets                   Ticket[]
+  winner                    Winner?
+  draws                     Draw[]
+
+  @@index([status])
+  @@index([endDate])
+  @@index([featured])
+  @@index([categoryId])
+}
+
+model Prize {
+  id             String       @id @default(uuid())
+  giveawayId     String       @unique
+  name           String
+  description    String
+  estimatedValue Decimal      @db.Decimal(12, 2)
+  currency       String?       @default("USD")
+  condition      String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  giveaway       Giveaway     @relation(fields: [giveawayId], references: [id], onDelete: Cascade)
+  images         PrizeImage[]
+}
+
+model PrizeImage {
+  id        String   @id @default(uuid())
+  prizeId   String
+  url       String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  prize     Prize    @relation(fields: [prizeId], references: [id], onDelete: Cascade)
+
+  @@index([prizeId, sortOrder])
+}
+
+
+model Order {
+  id             String      @id @default(uuid())
+  orderNumber    String      @unique
+  userId         String
+  giveawayId     String
+  quantity       Int
+  unitPrice      Decimal     @db.Decimal(12, 2)
+  totalAmount    Decimal     @db.Decimal(12, 2)
+  status         OrderStatus @default(PENDING)
+  idempotencyKey String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  user           User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  giveaway       Giveaway    @relation(fields: [giveawayId], references: [id], onDelete: Restrict)
+  payment        Payment?
+  tickets        Ticket[]
+
+  @@unique([userId, idempotencyKey])
+  @@index([userId, createdAt])
+  @@index([giveawayId, createdAt])
+  @@index([status])
+}
+
+model Payment {
+  id                    String        @id @default(uuid())
+  orderId               String        @unique
+  paymentMethodId       String?
+  provider              String
+  providerTransactionId String        @unique
+  amount                Decimal       @db.Decimal(12, 2)
+  currency              String
+  status                PaymentStatus @default(PENDING)
+  proofImageUrl         String?
+  metadata              Json?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  order                 Order         @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  paymentMethod         PaymentMethod? @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([paymentMethodId])
+}
+
+model PaymentMethod {
+  id          String                @id @default(uuid())
+  type        PaymentMethodType
+  provider    PaymentMethodProvider
+  name        String
+  details     String
+  network     String?
+  isActive    Boolean               @default(true)
+  sortOrder   Int                   @default(0)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  payments    Payment[]
+
+  @@index([type])
+  @@index([isActive])
+  @@index([type, isActive])
+}
+
+model Ticket {
+  id           String       @id @default(uuid())
+  ticketNumber String
+  userId       String
+  giveawayId   String
+  orderId      String
+  status       TicketStatus @default(ACTIVE)
+  createdAt    DateTime     @default(now())
+  user         User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  giveaway     Giveaway     @relation(fields: [giveawayId], references: [id], onDelete: Restrict)
+  order        Order        @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  winner       Winner?
+
+  @@unique([giveawayId, ticketNumber])
+  @@index([userId, createdAt])
+  @@index([giveawayId, status])
+  @@index([orderId])
+}
+
+model Winner {
+  id         String       @id @default(uuid())
+  giveawayId String       @unique
+  userId     String
+  ticketId   String       @unique
+  drawId     String       @unique
+  selectedAt DateTime     @default(now())
+  status     WinnerStatus @default(SELECTED)
+  giveaway   Giveaway     @relation(fields: [giveawayId], references: [id], onDelete: Restrict)
+  user       User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  ticket     Ticket       @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+  draw       Draw         @relation(fields: [drawId], references: [id], onDelete: Restrict)
+  claim      PrizeClaim?
+
+  @@index([userId])
+}
+
+model Draw {
+  id                   String     @id @default(uuid())
+  giveawayId           String
+  totalEligibleTickets Int
+  winningTicketId      String?
+  algorithm            String
+  startedAt            DateTime   @default(now())
+  completedAt          DateTime?
+  verificationHash     String?
+  status               DrawStatus @default(PENDING)
+  giveaway             Giveaway   @relation(fields: [giveawayId], references: [id], onDelete: Restrict)
+  winner               Winner?
+
+  @@index([giveawayId, startedAt])
+}
+
+model PrizeClaim {
+  id          String           @id @default(uuid())
+  winnerId    String           @unique
+  status      PrizeClaimStatus @default(PENDING)
+  claimedAt   DateTime?
+  deliveredAt DateTime?
+  confirmedAt DateTime?
+  notes       String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  winner      Winner           @relation(fields: [winnerId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read, createdAt])
+}
+
+model AuditLog {
+  id         String      @id @default(uuid())
+  actorId    String?
+  action     AuditAction
+  entityType String
+  entityId   String
+  metadata   Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime    @default(now())
+  actor      User?       @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([actorId, createdAt])
+  @@index([createdAt])
+}
+
+model PlatformSettings {
+  id              String   @id @default("global")
+  siteName        String   @default("GoKart")
+  supportEmail    String?
+  defaultCurrency String   @default("GBP")
+  updatedAt       DateTime @updatedAt
+  updatedById     String?
+  updatedBy       User?    @relation("PlatformSettingsUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([updatedById])
+}
