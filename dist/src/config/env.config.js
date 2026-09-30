@@ -3,7 +3,7 @@ dotenv.config();
 const ENV = {
     nodeEnv: process.env.NODE_ENV ?? "development",
     port: Number(process.env.PORT ?? 4000),
-    corsOrigins: process.env.CORS_ORIGINS ?? "http://localhost:5174",
+    corsOrigins: process.env.CORS_ORIGINS,
     database: {
         url: process.env.DATABASE_URL,
         ssl: process.env.DATABASE_SSL === "true",
@@ -26,9 +26,6 @@ const ENV = {
         //  port: Number(process.env.REDIS_PORT),
         //  password: process.env.REDIS_PASS,
         //  username: process.env.REDIS_USER,
-    },
-    cors: {
-        corsOrigins: process.env.REDIS_HOST || 'http://localhost:4000'
     },
 };
 export default ENV;

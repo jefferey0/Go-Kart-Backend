@@ -1,7 +1,7 @@
 declare const ENV: {
     nodeEnv: string;
     port: number;
-    corsOrigins: string;
+    corsOrigins: string | undefined;
     database: {
         url: string | undefined;
         ssl: boolean;
@@ -20,9 +20,6 @@ declare const ENV: {
     };
     redis: {
         url: string | undefined;
-    };
-    cors: {
-        corsOrigins: string;
     };
 };
 export default ENV;
