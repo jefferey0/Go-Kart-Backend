@@ -17,6 +17,7 @@ const authController = {
                         email,
                         phone,
                         password,
+                        role: req.body.role
                   });
                   
 
@@ -213,7 +214,7 @@ const authController = {
                         });
                   }
 
-                  
+
                   return res.status(500).json({
                         error: true,
                         status: 500,

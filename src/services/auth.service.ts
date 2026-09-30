@@ -25,6 +25,7 @@ export const authService = {
             email: string;
             phone: string;
             password: string;
+            role?: UserRole;
       }) {
             if (!data.firstName?.trim() || !data.lastName?.trim() || !data.email?.trim() || !data.phone?.trim()) {
                   throw new AppError(400, "All registration fields are required", "INVALID_REGISTRATION");
@@ -55,7 +56,7 @@ export const authService = {
                   email,
                   phone: data.phone,
                   passwordHash,
-                  role: "USER",
+                  role: data.role || "USER",
             });
 
             return newUser;
