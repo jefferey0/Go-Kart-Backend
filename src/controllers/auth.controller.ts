@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { authService } from "../services/auth.service.ts";
 import logger from "../logger.ts";
+import { AppError } from "../utils/Response/http-error.ts";
 
 
 
@@ -29,6 +30,16 @@ const authController = {
 
             } catch (error) {
                   logger.error(error);
+
+                  
+                  if (error instanceof AppError) {
+                        return res.status(error.statusCode).json({
+                              error: true,
+                              status: error.statusCode,
+                              message: error.message,
+                              code: error.code,
+                        });
+                  }
                   return res.status(500).json({
                         error: true,
                         status: 500,
@@ -52,6 +63,16 @@ const authController = {
                   
             } catch (error) {
                   logger.error(error);
+
+                  if (error instanceof AppError) {
+                        return res.status(error.statusCode).json({
+                              error: true,
+                              status: error.statusCode,
+                              message: error.message,
+                              code: error.code,
+                        });
+                  }
+
                   return res.status(500).json({
                         error: true,
                         status: 500,
@@ -74,6 +95,16 @@ const authController = {
                   });
             } catch (error) {
                   logger.error(error);
+
+                  if (error instanceof AppError) {
+                        return res.status(error.statusCode).json({
+                              error: true,
+                              status: error.statusCode,
+                              message: error.message,
+                              code: error.code,
+                        });
+                  }
+
                   return res.status(500).json({
                         error: true,
                         status: 500,
@@ -105,6 +136,16 @@ const authController = {
                   
             } catch (error) {
                   logger.error(error);
+
+                  if (error instanceof AppError) {
+                        return res.status(error.statusCode).json({
+                              error: true,
+                              status: error.statusCode,
+                              message: error.message,
+                              code: error.code,
+                        });
+                  }
+
                   return res.status(500).json({
                       error: true,
                       status: 500,
@@ -127,6 +168,17 @@ const authController = {
                   });
             } catch (error) {
                   logger.error(error);
+
+                  if (error instanceof AppError) {
+                        return res.status(error.statusCode).json({
+                              error: true,
+                              status: error.statusCode,
+                              message: error.message,
+                              code: error.code,
+                        });
+                  }
+
+
                   return res.status(500).json({
                         error: true,
                         status: 500,
@@ -151,6 +203,17 @@ const authController = {
                   });
             } catch (error) {
                   logger.error(error);
+
+                  if (error instanceof AppError) {
+                        return res.status(error.statusCode).json({
+                              error: true,
+                              status: error.statusCode,
+                              message: error.message,
+                              code: error.code,
+                        });
+                  }
+
+                  
                   return res.status(500).json({
                         error: true,
                         status: 500,
