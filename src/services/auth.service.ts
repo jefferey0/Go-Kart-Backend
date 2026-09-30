@@ -30,8 +30,8 @@ export const authService = {
             if (!data.firstName?.trim() || !data.lastName?.trim() || !data.email?.trim() || !data.phone?.trim()) {
                   throw new AppError(400, "All registration fields are required", "INVALID_REGISTRATION");
             }
-            if (typeof data.password !== "string" || data.password.length < 12) {
-                  throw new AppError(400, "Password must be at least 12 characters", "WEAK_PASSWORD");
+            if (typeof data.password !== "string" || data.password.length < 8) {
+                  throw new AppError(400, "Password must be at least 8 characters", "WEAK_PASSWORD");
             }
             const email = data.email.toLowerCase().trim();
             if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
