@@ -117,7 +117,7 @@ paths:
       responses:
         '200': { description: User updated successfully }
         '401': { $ref: '#/components/responses/Unauthorized' }
-        
+
   /auth/me:
     delete:
       tags: [Authentication]
@@ -126,6 +126,7 @@ paths:
       responses:
         '200': { description: User deleted successfully }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        
   /auth/users/{id}:
     delete:
       tags: [Authentication]
