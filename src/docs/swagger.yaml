@@ -1,15 +1,13 @@
 openapi: 3.0.3
 info:
-  title: Go-Kart Giveaway API
+  title: Go-Kart Raffle API
   version: 1.0.0
   description: |
-    OpenAPI documentation for the Go-Kart Giveaway backend.
+    Go-Kart backend documentation.
 
 servers:
-  - url: http://localhost:4000/api
-    description: Local API
-  - url: https://api.example.com/api
-    description: Production (replace with your real API hostname)
+  - url: /api
+    description: API on this host
 tags:
   - name: Authentication
   - name: Giveaways
