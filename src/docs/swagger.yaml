@@ -6,8 +6,8 @@ info:
     Go-Kart backend documentation.
 
 servers:
-  - url: /api
-    description: API on this host
+  - url: https://gokartraffle-backend.onrender.com/api
+    description: Production API
 tags:
   - name: Authentication
   - name: Giveaways
