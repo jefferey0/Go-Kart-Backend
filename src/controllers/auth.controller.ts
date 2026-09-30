@@ -17,7 +17,6 @@ const authController = {
                         email,
                         phone,
                         password,
-                        role: req.body.role
                   });
                   
 
@@ -214,6 +213,69 @@ const authController = {
                         });
                   }
 
+                  
+                  return res.status(500).json({
+                        error: true,
+                        status: 500,
+                        message: "An error occurred",
+                  })
+            }
+      },
+
+      async deleteUser(req: Request, res: Response) {
+            try {
+                  const id = req.user?.userId as string;
+
+                  await authService.deleteMe(id);
+
+                  return res.status(200).json({
+                        error: false,
+                        status: 200,
+                        message: "User deleted successfully",
+                  });
+            } catch (error) {
+                  logger.error(error);
+
+                  if (error instanceof AppError) {
+                        return res.status(error.statusCode).json({
+                              error: true,
+                              status: error.statusCode,
+                              message: error.message,
+                              code: error.code,
+                        });
+                  }
+
+                  return res.status(500).json({
+                        error: true,
+                        status: 500,
+                        message: "An error occurred",
+                  })
+            }
+      },
+
+      async deleteUserById(req: Request, res: Response) {
+            try {
+                  const AdminId = req.user?.userId as string;
+                  const { id } = req.params as { id: string };
+
+                  await authService.deleteUserById(id, AdminId);
+
+                  return res.status(200).json({
+                        error: false,
+                        status: 200,
+                        message: "User deleted successfully",
+                  });
+            } catch (error) {
+                  logger.error(error);
+
+                  if (error instanceof AppError) {
+                        return res.status(error.statusCode).json({
+                              error: true,
+                              status: error.statusCode,
+                              message: error.message,
+                              code: error.code,
+                        });
+                  }
 
                   return res.status(500).json({
                         error: true,

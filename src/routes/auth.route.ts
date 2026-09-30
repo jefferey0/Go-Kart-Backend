@@ -1,6 +1,6 @@
 import express from "express";
 import authController from "../controllers/auth.controller.ts";
-import { protectedAction } from "../middlewares/protected.middleware.ts";
+import { protectedAction, authorize } from "../middlewares/protected.middleware.ts";
 import { rateLimit } from "../middlewares/security.ts";
 
 
@@ -17,6 +17,11 @@ router.post('/logout', authController.logout);
 router.get('/me', protectedAction, authController.me)
 
 router.patch('/me', protectedAction, authController.updateUser)
+
+router.delete('/me', protectedAction, authController.deleteUser)
+
+router.delete('/users/:id', protectedAction, authorize('ADMIN'), authController.deleteUserById)
+
 
 
 
